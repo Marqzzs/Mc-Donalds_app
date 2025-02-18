@@ -4,86 +4,95 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// Define o gerador do cliente Prisma, que cria automaticamente o Prisma Client para interagir com o banco de dados.
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client-js" // Usa JavaScript como cliente Prisma.
 }
 
+// Configuração da fonte de dados, definindo o provedor do banco de dados e a URL de conexão.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql" // Especifica que o banco de dados é PostgreSQL.
+  url      = env("DATABASE_URL") // Obtém a URL do banco de dados das variáveis de ambiente.
 }
 
+// Modelo que representa um restaurante no sistema.
 model Restaurant {
-  id             String         @id @default(uuid())
-  name           String
-  slug           String
-  description    String
-  avatarImageUrl String
-  coverImageUrl  String
-  menuCategories MenuCategory[]
-  products       Product[]
-  orders         Order[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id             String         @id @default(uuid()) // ID único gerado automaticamente como UUID.
+  name           String // Nome do restaurante.
+  slug           String // Slug (versão amigável do nome para URLs).
+  description    String // Descrição do restaurante.
+  avatarImageUrl String // URL da imagem de avatar do restaurante.
+  coverImageUrl  String // URL da imagem de capa do restaurante.
+  menuCategories MenuCategory[] // Relacionamento com categorias de menu (um restaurante tem várias categorias).
+  products       Product[] // Relacionamento com produtos (um restaurante tem vários produtos).
+  orders         Order[] // Relacionamento com pedidos (um restaurante pode ter vários pedidos).
+  createdAt      DateTime       @default(now()) // Data de criação do registro.
+  updatedAt      DateTime       @updatedAt // Atualiza automaticamente a data sempre que o registro for modificado.
 }
 
+// Modelo que representa uma categoria de menu dentro de um restaurante.
 model MenuCategory {
-  id           String     @id @default(uuid())
-  name         String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  restaurantId String
-  products     Product[]
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id           String     @id @default(uuid()) // ID único gerado automaticamente como UUID.
+  name         String // Nome da categoria do menu.
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade) // Relacionamento com um restaurante.
+  restaurantId String // ID do restaurante ao qual pertence.
+  products     Product[] // Relacionamento com produtos (uma categoria pode ter vários produtos).
+  createdAt    DateTime   @default(now()) // Data de criação do registro.
+  updatedAt    DateTime   @updatedAt // Atualiza automaticamente a data sempre que o registro for modificado.
 }
 
+// Modelo que representa um produto disponível no restaurante.
 model Product {
-  id             String         @id @default(uuid())
-  name           String
-  description    String
-  price          Float
-  imageUrl       String
-  ingredients    String[]
-  orderProducts  OrderProduct[]
-  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  restaurantId   String
-  menuCategory   MenuCategory   @relation(fields: [menuCategoryId], references: [id], onDelete: Cascade)
-  menuCategoryId String
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id             String         @id @default(uuid()) // ID único gerado automaticamente como UUID.
+  name           String // Nome do produto.
+  description    String // Descrição do produto.
+  price          Float // Preço do produto.
+  imageUrl       String // URL da imagem do produto.
+  ingredients    String[] // Lista de ingredientes do produto.
+  orderProducts  OrderProduct[] // Relacionamento com os pedidos onde esse produto foi incluído.
+  restaurant     Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade) // Relacionamento com um restaurante.
+  restaurantId   String // ID do restaurante ao qual pertence.
+  menuCategory   MenuCategory   @relation(fields: [menuCategoryId], references: [id], onDelete: Cascade) // Relacionamento com a categoria de menu.
+  menuCategoryId String // ID da categoria de menu ao qual pertence.
+  createdAt      DateTime       @default(now()) // Data de criação do registro.
+  updatedAt      DateTime       @updatedAt // Atualiza automaticamente a data sempre que o registro for modificado.
 }
 
+// Modelo que representa um pedido feito por um cliente.
 model Order {
-  id                String               @id @default(uuid())
-  total             Float
-  status            OrderStatus
-  consumptionMethod ConsumptionMethod
-  restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  restaurantId      String
-  orderProducts     OrderProduct[]
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  id                String               @id @default(uuid()) // ID único gerado automaticamente como UUID.
+  total             Float // Valor total do pedido.
+  status            OrderStatus // Status do pedido (pendente, em preparação, finalizado).
+  consumptionMethod ConsumptionMethod // Método de consumo (para viagem ou no local).
+  restaurant        Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade) // Relacionamento com um restaurante.
+  restaurantId      String // ID do restaurante ao qual pertence.
+  orderProducts     OrderProduct[] // Relacionamento com os produtos incluídos no pedido.
+  createdAt         DateTime          @default(now()) // Data de criação do registro.
+  updatedAt         DateTime          @updatedAt // Atualiza automaticamente a data sempre que o registro for modificado.
 }
 
+// Modelo que representa a relação entre pedidos e produtos (tabela intermediária para relação N:N).
 model OrderProduct {
-  id        String   @id @default(uuid())
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId String
-  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId   String
-  quantity  Int
-  price     Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid()) // ID único gerado automaticamente como UUID.
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // Relacionamento com um produto.
+  productId String // ID do produto incluído no pedido.
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade) // Relacionamento com um pedido.
+  orderId   String // ID do pedido ao qual o produto pertence.
+  quantity  Int // Quantidade do produto no pedido.
+  price     Float // Preço unitário do produto no momento do pedido.
+  createdAt DateTime @default(now()) // Data de criação do registro.
+  updatedAt DateTime @updatedAt // Atualiza automaticamente a data sempre que o registro for modificado.
 }
 
+// Enum que define os status possíveis de um pedido.
 enum OrderStatus {
-  PENDING
-  IN_PREPARATION
-  FINISHED
+  PENDING // Pedido pendente.
+  IN_PREPARATION // Pedido em preparação.
+  FINISHED // Pedido finalizado.
 }
 
+// Enum que define os métodos de consumo do pedido.
 enum ConsumptionMethod {
-  TAKEAWAY
-  DINE_IN
+  TAKEAWAY // Pedido para viagem.
+  DINE_IN // Pedido para consumo no local.
 }
