@@ -19,7 +19,7 @@ datasource db {
 model Restaurant {
   id             String         @id @default(uuid()) // ID único gerado automaticamente como UUID.
   name           String // Nome do restaurante.
-  slug           String // Slug (versão amigável do nome para URLs).
+  slug           String         @unique // Slug (versão amigável do nome para URLs).
   description    String // Descrição do restaurante.
   avatarImageUrl String // URL da imagem de avatar do restaurante.
   coverImageUrl  String // URL da imagem de capa do restaurante.
@@ -60,7 +60,7 @@ model Product {
 
 // Modelo que representa um pedido feito por um cliente.
 model Order {
-  id                String               @id @default(uuid()) // ID único gerado automaticamente como UUID.
+  id                String            @id @default(uuid()) // ID único gerado automaticamente como UUID.
   total             Float // Valor total do pedido.
   status            OrderStatus // Status do pedido (pendente, em preparação, finalizado).
   consumptionMethod ConsumptionMethod // Método de consumo (para viagem ou no local).
